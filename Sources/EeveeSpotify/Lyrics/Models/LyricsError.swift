@@ -9,6 +9,10 @@ enum LyricsError: Error, CustomStringConvertible {
     case noSuchSong
     case unknownError
     case invalidSource
+    case spicyNetworkError
+    case spicyInvalidResponse
+    case spicyTimeout
+    case spicyRateLimited
     
     // swift 5.8 compatible
     var description: String {
@@ -23,6 +27,14 @@ enum LyricsError: Error, CustomStringConvertible {
             return "decoding_error".localized
         case .unknownError:
             return "unknown_error".localized
+        case .spicyNetworkError:
+            return "spicy_network_error".localized
+        case .spicyInvalidResponse:
+            return "spicy_invalid_response".localized
+        case .spicyTimeout:
+            return "spicy_timeout".localized
+        case .spicyRateLimited:
+            return "spicy_rate_limited".localized
         default:
             return ""
         }
