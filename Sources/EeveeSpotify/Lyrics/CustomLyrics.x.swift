@@ -13,9 +13,13 @@ var lyricsState = LyricsLoadingState()
 
 var hasShownRestrictedPopUp = false
 var hasShownUnauthorizedPopUp = false
+var hasShownNetworkErrorPopUp = false
+var hasShownTimeoutPopUp = false
+var hasShownRateLimitPopUp = false
 
 private let geniusLyricsRepository = GeniusLyricsRepository()
 private let petitLyricsRepository = PetitLyricsRepository()
+private let spicyLyricsRepository = SpicyLyricsRepository()
 
 // Overload for 9.1.6 where we only have track ID from URL
 private func loadCustomLyricsForTrackId(_ trackId: String) throws -> Lyrics {
@@ -26,7 +30,7 @@ private func loadCustomLyricsForTrackId(_ trackId: String) throws -> Lyrics {
     var currentArtist: String? = nil
     var hasMetadata = false
 
-    let needsMetadata = source == .genius || source == .lrclib || source == .petit
+    let needsMetadata = source == .genius || source == .lrclib || source == .petit || source == .spicy
 
     // 1. Use cached metadata if it's for the same track
     if capturedTrackId == trackId, let title = capturedTrackTitle, let artist = capturedArtistName {
@@ -110,6 +114,8 @@ private func loadCustomLyricsForTrackId(_ trackId: String) throws -> Lyrics {
         repository = MusixmatchLyricsRepository.shared
     case .petit:
         repository = petitLyricsRepository
+    case .spicy:
+        repository = spicyLyricsRepository
     case .notReplaced:
         throw LyricsError.invalidSource
     }
@@ -147,6 +153,39 @@ private func loadCustomLyricsForTrackId(_ trackId: String) throws -> Lyrics {
                         )
                     }
                     hasShownRestrictedPopUp = true
+                }
+            case .spicyNetworkError:
+                if !hasShownNetworkErrorPopUp {
+                    DispatchQueue.main.async {
+                        PopUpHelper.showPopUp(
+                            delayed: false,
+                            message: "spicy_network_error_popup".localized,
+                            buttonText: "OK".uiKitLocalized
+                        )
+                    }
+                    hasShownNetworkErrorPopUp = true
+                }
+            case .spicyTimeout:
+                if !hasShownTimeoutPopUp {
+                    DispatchQueue.main.async {
+                        PopUpHelper.showPopUp(
+                            delayed: false,
+                            message: "spicy_timeout_popup".localized,
+                            buttonText: "OK".uiKitLocalized
+                        )
+                    }
+                    hasShownTimeoutPopUp = true
+                }
+            case .spicyRateLimited:
+                if !hasShownRateLimitPopUp {
+                    DispatchQueue.main.async {
+                        PopUpHelper.showPopUp(
+                            delayed: false,
+                            message: "spicy_rate_limited_popup".localized,
+                            buttonText: "OK".uiKitLocalized
+                        )
+                    }
+                    hasShownRateLimitPopUp = true
                 }
             default:
                 break
@@ -216,6 +255,8 @@ private func loadCustomLyricsForCurrentTrack() throws -> Lyrics {
         repository = MusixmatchLyricsRepository.shared
     case .petit:
         repository = petitLyricsRepository
+    case .spicy:
+        repository = spicyLyricsRepository
     case .notReplaced:
         throw LyricsError.invalidSource
     }
@@ -253,6 +294,36 @@ private func loadCustomLyricsForCurrentTrack() throws -> Lyrics {
                     )
                     
                     hasShownRestrictedPopUp.toggle()
+                }
+            
+            case .spicyNetworkError:
+                if !hasShownNetworkErrorPopUp {
+                    PopUpHelper.showPopUp(
+                        delayed: false,
+                        message: "spicy_network_error_popup".localized,
+                        buttonText: "OK".uiKitLocalized
+                    )
+                    hasShownNetworkErrorPopUp.toggle()
+                }
+            
+            case .spicyTimeout:
+                if !hasShownTimeoutPopUp {
+                    PopUpHelper.showPopUp(
+                        delayed: false,
+                        message: "spicy_timeout_popup".localized,
+                        buttonText: "OK".uiKitLocalized
+                    )
+                    hasShownTimeoutPopUp.toggle()
+                }
+            
+            case .spicyRateLimited:
+                if !hasShownRateLimitPopUp {
+                    PopUpHelper.showPopUp(
+                        delayed: false,
+                        message: "spicy_rate_limited_popup".localized,
+                        buttonText: "OK".uiKitLocalized
+                    )
+                    hasShownRateLimitPopUp.toggle()
                 }
                 
             default:
